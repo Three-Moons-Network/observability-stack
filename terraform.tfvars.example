@@ -1,0 +1,66 @@
+# observability-stack Configuration Example
+
+region      = "us-east-1"
+project     = "mycompany"
+environment = "prod"
+
+# ========================================================================
+# SNS Alert Routing
+# ========================================================================
+
+# Warning-level alerts (slower response, email preferred)
+warning_email_addresses = ["ops@example.com"]
+warning_phone_numbers   = []
+enable_warning_sms      = false
+
+# Critical alerts (immediate response, SMS priority)
+critical_email_addresses = ["ops@example.com", "cto@example.com"]
+critical_phone_numbers   = ["+14155552671"]  # E.164 format
+
+# Optional Slack integration (webhook from Slack app)
+enable_slack      = false
+slack_webhook_url = ""
+
+# Optional PagerDuty integration
+enable_pagerduty        = false
+pagerduty_webhook_url   = ""
+
+# ========================================================================
+# Lambda Alarm Thresholds
+# ========================================================================
+
+enable_lambda_alarms             = true
+lambda_error_threshold           = 1      # Alert if > 1 error per 5 minutes
+lambda_duration_threshold_ms     = 5000   # Alert if p99 duration > 5 seconds
+
+# ========================================================================
+# API Gateway Alarm Thresholds
+# ========================================================================
+
+enable_api_gateway_alarms          = true
+api_gateway_5xx_threshold          = 1      # Alert if > 1 5xx error per 5 minutes
+api_gateway_latency_threshold_ms   = 2000   # Alert if p99 latency > 2 seconds
+
+# ========================================================================
+# DynamoDB Alarm Thresholds
+# ========================================================================
+
+enable_dynamodb_alarms   = true
+dynamodb_error_threshold = 1      # Alert if > 1 error per 5 minutes
+
+# ========================================================================
+# Dashboard Configuration
+# ========================================================================
+
+dashboard_metric_period      = 300  # 5-minute aggregation
+enable_lambda_metrics        = true
+enable_api_gateway_metrics   = true
+enable_dynamodb_metrics      = true
+enable_s3_metrics            = true
+
+# ========================================================================
+# Log Configuration
+# ========================================================================
+
+create_log_group    = true
+log_retention_days  = 14
