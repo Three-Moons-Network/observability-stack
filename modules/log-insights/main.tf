@@ -92,21 +92,21 @@ resource "aws_cloudwatch_log_group" "insights" {
 output "query_definitions" {
   description = "CloudWatch Logs Insights query definitions (use with CLI/Console)"
   value = {
-    error_rate                = local.query_error_rate
-    cold_starts               = local.query_cold_starts
-    latency_percentiles       = local.query_latency_percentiles
-    slow_requests             = local.query_slow_requests
-    lambda_errors             = local.query_lambda_errors
-    api_gateway_latency       = local.query_api_gateway_latency
-    dynamodb_throttles        = local.query_dynamodb_throttles
-    trace_request_by_id       = local.query_trace_request
+    error_rate          = local.query_error_rate
+    cold_starts         = local.query_cold_starts
+    latency_percentiles = local.query_latency_percentiles
+    slow_requests       = local.query_slow_requests
+    lambda_errors       = local.query_lambda_errors
+    api_gateway_latency = local.query_api_gateway_latency
+    dynamodb_throttles  = local.query_dynamodb_throttles
+    trace_request_by_id = local.query_trace_request
   }
 }
 
 # Query helper documentation
 output "query_guide" {
   description = "How to use these Insights queries"
-  value = <<EOG
+  value       = <<EOG
 CloudWatch Logs Insights Saved Queries
 
 To create a saved query via AWS CLI:

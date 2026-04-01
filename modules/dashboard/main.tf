@@ -76,9 +76,9 @@ locals {
     {
       type = "log"
       properties = {
-        query   = "fields @timestamp, @message, @duration | stats avg(@duration) by bin(5m)"
-        region  = data.aws_region.current.name
-        title   = "Cold Start Detection"
+        query  = "fields @timestamp, @message, @duration | stats avg(@duration) by bin(5m)"
+        region = data.aws_region.current.name
+        title  = "Cold Start Detection"
       }
     },
   ] : []
