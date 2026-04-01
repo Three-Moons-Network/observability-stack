@@ -44,7 +44,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_duration_p99" {
   metric_name         = "Duration"
   namespace           = "AWS/Lambda"
   period              = 60
-  statistic           = "p99"
+  extended_statistic  = "p99"
   threshold           = var.lambda_duration_threshold_ms
   alarm_description   = "Lambda p99 duration exceeds ${var.lambda_duration_threshold_ms}ms"
   alarm_actions       = var.alarm_sns_topic_arns
@@ -102,7 +102,7 @@ resource "aws_cloudwatch_metric_alarm" "api_gateway_latency_p99" {
   metric_name         = "Latency"
   namespace           = "AWS/ApiGateway"
   period              = 60
-  statistic           = "p99"
+  extended_statistic  = "p99"
   threshold           = var.api_gateway_latency_threshold_ms
   alarm_description   = "API Gateway p99 latency exceeds ${var.api_gateway_latency_threshold_ms}ms"
   alarm_actions       = var.alarm_sns_topic_arns
