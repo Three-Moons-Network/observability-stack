@@ -37,141 +37,137 @@ resource "aws_cloudwatch_dashboard" "this" {
 
 # Lambda widgets (invocations, errors, duration, concurrent executions)
 locals {
-  lambda_widgets = concat(
-    var.enable_lambda_metrics ? [
-      {
-        type = "metric"
-        properties = {
-          metrics = [
-            ["AWS/Lambda", "Invocations", { stat = "Sum" }],
-            [".", "Errors", { stat = "Sum" }],
-            [".", "Duration", { stat = "Average" }],
-            [".", "ConcurrentExecutions", { stat = "Maximum" }],
-            [".", "Throttles", { stat = "Sum" }],
-          ]
-          period = var.dashboard_metric_period
-          stat   = "Average"
-          region = data.aws_region.current.name
-          title  = "Lambda Metrics"
-          yAxis = {
-            left = {
-              min = 0
-            }
+  _lambda_widget_defs = [
+    {
+      type = "metric"
+      properties = {
+        metrics = [
+          ["AWS/Lambda", "Invocations", { stat = "Sum" }],
+          [".", "Errors", { stat = "Sum" }],
+          [".", "Duration", { stat = "Average" }],
+          [".", "ConcurrentExecutions", { stat = "Maximum" }],
+          [".", "Throttles", { stat = "Sum" }],
+        ]
+        period = var.dashboard_metric_period
+        stat   = "Average"
+        region = data.aws_region.current.name
+        title  = "Lambda Metrics"
+        yAxis = {
+          left = {
+            min = 0
           }
         }
-      },
-      {
-        type = "metric"
-        properties = {
-          metrics = [
-            ["AWS/Lambda", "Duration", { stat = "p50" }],
-            ["...", { stat = "p90" }],
-            ["...", { stat = "p99" }],
-          ]
-          period = var.dashboard_metric_period
-          stat   = "Average"
-          region = data.aws_region.current.name
-          title  = "Lambda Duration Percentiles (ms)"
-        }
-      },
-      {
-        type = "log"
-        properties = {
-          query  = "fields @timestamp, @message, @duration | stats avg(@duration) by bin(5m)"
-          region = data.aws_region.current.name
-          title  = "Cold Start Detection"
-        }
-      },
-    ] : [],
-  )
+      }
+    },
+    {
+      type = "metric"
+      properties = {
+        metrics = [
+          ["AWS/Lambda", "Duration", { stat = "p50" }],
+          ["...", { stat = "p90" }],
+          ["...", { stat = "p99" }],
+        ]
+        period = var.dashboard_metric_period
+        stat   = "Average"
+        region = data.aws_region.current.name
+        title  = "Lambda Duration Percentiles (ms)"
+      }
+    },
+    {
+      type = "log"
+      properties = {
+        query  = "fields @timestamp, @message, @duration | stats avg(@duration) by bin(5m)"
+        region = data.aws_region.current.name
+        title  = "Cold Start Detection"
+      }
+    },
+  ]
+  lambda_widgets = [for w in local._lambda_widget_defs : w if var.enable_lambda_metrics]
 
   # API Gateway widgets (request count, latency, errors, throttles)
-  api_gateway_widgets = concat(
-    var.enable_api_gateway_metrics ? [
-      {
-        type = "metric"
-        properties = {
-          metrics = [
-            ["AWS/ApiGateway", "Count", { stat = "Sum" }],
-            [".", "4XXError", { stat = "Sum" }],
-            [".", "5XXError", { stat = "Sum" }],
-          ]
-          period = var.dashboard_metric_period
-          stat   = "Sum"
-          region = data.aws_region.current.name
-          title  = "API Gateway Requests & Errors"
-        }
-      },
-      {
-        type = "metric"
-        properties = {
-          metrics = [
-            ["AWS/ApiGateway", "Latency", { stat = "Average" }],
-            ["...", { stat = "p50" }],
-            ["...", { stat = "p99" }],
-          ]
-          period = var.dashboard_metric_period
-          stat   = "Average"
-          region = data.aws_region.current.name
-          title  = "API Gateway Latency (ms)"
-        }
-      },
-    ] : [],
-  )
+  _api_gw_widget_defs = [
+    {
+      type = "metric"
+      properties = {
+        metrics = [
+          ["AWS/ApiGateway", "Count", { stat = "Sum" }],
+          [".", "4XXError", { stat = "Sum" }],
+          [".", "5XXError", { stat = "Sum" }],
+        ]
+        period = var.dashboard_metric_period
+        stat   = "Sum"
+        region = data.aws_region.current.name
+        title  = "API Gateway Requests & Errors"
+      }
+    },
+    {
+      type = "metric"
+      properties = {
+        metrics = [
+          ["AWS/ApiGateway", "Latency", { stat = "Average" }],
+          ["...", { stat = "p50" }],
+          ["...", { stat = "p99" }],
+        ]
+        period = var.dashboard_metric_period
+        stat   = "Average"
+        region = data.aws_region.current.name
+        title  = "API Gateway Latency (ms)"
+      }
+    },
+  ]
+  api_gateway_widgets = [for w in local._api_gw_widget_defs : w if var.enable_api_gateway_metrics]
 
   # DynamoDB widgets (read/write capacity, errors, throttles)
-  dynamodb_widgets = concat(
-    var.enable_dynamodb_metrics ? [
-      {
-        type = "metric"
-        properties = {
-          metrics = [
-            ["AWS/DynamoDB", "ConsumedReadCapacityUnits", { stat = "Sum" }],
-            [".", "ConsumedWriteCapacityUnits", { stat = "Sum" }],
-            [".", "UserErrors", { stat = "Sum" }],
-            [".", "SystemErrors", { stat = "Sum" }],
-          ]
-          period = var.dashboard_metric_period
-          stat   = "Sum"
-          region = data.aws_region.current.name
-          title  = "DynamoDB Capacity & Errors"
-        }
-      },
-      {
-        type = "metric"
-        properties = {
-          metrics = [
-            ["AWS/DynamoDB", "ReadThrottleEvents", { stat = "Sum" }],
-            [".", "WriteThrottleEvents", { stat = "Sum" }],
-          ]
-          period = var.dashboard_metric_period
-          stat   = "Sum"
-          region = data.aws_region.current.name
-          title  = "DynamoDB Throttle Events"
-        }
-      },
-    ] : [],
-  )
+  _dynamodb_widget_defs = [
+    {
+      type = "metric"
+      properties = {
+        metrics = [
+          ["AWS/DynamoDB", "ConsumedReadCapacityUnits", { stat = "Sum" }],
+          [".", "ConsumedWriteCapacityUnits", { stat = "Sum" }],
+          [".", "UserErrors", { stat = "Sum" }],
+          [".", "SystemErrors", { stat = "Sum" }],
+        ]
+        period = var.dashboard_metric_period
+        stat   = "Sum"
+        region = data.aws_region.current.name
+        title  = "DynamoDB Capacity & Errors"
+      }
+    },
+    {
+      type = "metric"
+      properties = {
+        metrics = [
+          ["AWS/DynamoDB", "ReadThrottleEvents", { stat = "Sum" }],
+          [".", "WriteThrottleEvents", { stat = "Sum" }],
+        ]
+        period = var.dashboard_metric_period
+        stat   = "Sum"
+        region = data.aws_region.current.name
+        title  = "DynamoDB Throttle Events"
+      }
+    },
+  ]
+  dynamodb_widgets = [for w in local._dynamodb_widget_defs : w if var.enable_dynamodb_metrics]
 
   # S3 widgets (request count, 4xx/5xx errors)
-  s3_widgets = concat(
-    var.enable_s3_metrics ? [
-      {
-        type = "metric"
-        properties = {
-          metrics = [
-            ["AWS/S3", "NumberOfObjects", { stat = "Average" }],
-            [".", "BucketSizeBytes", { stat = "Average" }],
-            [".", "AllRequests", { stat = "Sum" }],
-          ]
-          period = var.dashboard_metric_period
-          stat   = "Average"
-          region = data.aws_region.current.name
-          title  = "S3 Bucket Metrics"
-        }
-      },
-    ] : [],
-  )
+  _s3_widget_defs = [
+    {
+      type = "metric"
+      properties = {
+        metrics = [
+          ["AWS/S3", "NumberOfObjects", { stat = "Average" }],
+          [".", "BucketSizeBytes", { stat = "Average" }],
+          [".", "AllRequests", { stat = "Sum" }],
+        ]
+        period = var.dashboard_metric_period
+        stat   = "Average"
+        region = data.aws_region.current.name
+        title  = "S3 Bucket Metrics"
+      }
+    },
+  ]
+  s3_widgets = [for w in local._s3_widget_defs : w if var.enable_s3_metrics]
 
   # Summary widget (overview of errors across all services)
   summary_widgets = [
