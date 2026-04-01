@@ -120,54 +120,58 @@ locals {
   )
 
   # DynamoDB widgets (read/write capacity, errors, throttles)
-  dynamodb_widgets = var.enable_dynamodb_metrics ? [
-    {
-      type = "metric"
-      properties = {
-        metrics = [
-          ["AWS/DynamoDB", "ConsumedReadCapacityUnits", { stat = "Sum" }],
-          [".", "ConsumedWriteCapacityUnits", { stat = "Sum" }],
-          [".", "UserErrors", { stat = "Sum" }],
-          [".", "SystemErrors", { stat = "Sum" }],
-        ]
-        period = var.dashboard_metric_period
-        stat   = "Sum"
-        region = data.aws_region.current.name
-        title  = "DynamoDB Capacity & Errors"
-      }
-    },
-    {
-      type = "metric"
-      properties = {
-        metrics = [
-          ["AWS/DynamoDB", "ReadThrottleEvents", { stat = "Sum" }],
-          [".", "WriteThrottleEvents", { stat = "Sum" }],
-        ]
-        period = var.dashboard_metric_period
-        stat   = "Sum"
-        region = data.aws_region.current.name
-        title  = "DynamoDB Throttle Events"
-      }
-    },
-  ] : []
+  dynamodb_widgets = concat(
+    var.enable_dynamodb_metrics ? [
+      {
+        type = "metric"
+        properties = {
+          metrics = [
+            ["AWS/DynamoDB", "ConsumedReadCapacityUnits", { stat = "Sum" }],
+            [".", "ConsumedWriteCapacityUnits", { stat = "Sum" }],
+            [".", "UserErrors", { stat = "Sum" }],
+            [".", "SystemErrors", { stat = "Sum" }],
+          ]
+          period = var.dashboard_metric_period
+          stat   = "Sum"
+          region = data.aws_region.current.name
+          title  = "DynamoDB Capacity & Errors"
+        }
+      },
+      {
+        type = "metric"
+        properties = {
+          metrics = [
+            ["AWS/DynamoDB", "ReadThrottleEvents", { stat = "Sum" }],
+            [".", "WriteThrottleEvents", { stat = "Sum" }],
+          ]
+          period = var.dashboard_metric_period
+          stat   = "Sum"
+          region = data.aws_region.current.name
+          title  = "DynamoDB Throttle Events"
+        }
+      },
+    ] : [],
+  )
 
   # S3 widgets (request count, 4xx/5xx errors)
-  s3_widgets = var.enable_s3_metrics ? [
-    {
-      type = "metric"
-      properties = {
-        metrics = [
-          ["AWS/S3", "NumberOfObjects", { stat = "Average" }],
-          [".", "BucketSizeBytes", { stat = "Average" }],
-          [".", "AllRequests", { stat = "Sum" }],
-        ]
-        period = var.dashboard_metric_period
-        stat   = "Average"
-        region = data.aws_region.current.name
-        title  = "S3 Bucket Metrics"
-      }
-    },
-  ] : []
+  s3_widgets = concat(
+    var.enable_s3_metrics ? [
+      {
+        type = "metric"
+        properties = {
+          metrics = [
+            ["AWS/S3", "NumberOfObjects", { stat = "Average" }],
+            [".", "BucketSizeBytes", { stat = "Average" }],
+            [".", "AllRequests", { stat = "Sum" }],
+          ]
+          period = var.dashboard_metric_period
+          stat   = "Average"
+          region = data.aws_region.current.name
+          title  = "S3 Bucket Metrics"
+        }
+      },
+    ] : [],
+  )
 
   # Summary widget (overview of errors across all services)
   summary_widgets = [
