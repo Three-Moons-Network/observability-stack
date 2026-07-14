@@ -1,0 +1,20 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: observability-stack
+  description: >
+    Reusable CloudWatch observability — dashboards, alarms, SNS routing by severity, and Log Insights queries for Lambda + API Gateway + DynamoDB.
+  annotations:
+    github.com/project-slug: Three-Moons-Network/observability-stack
+  tags:
+    - alarms
+    - aws
+    - cloudwatch
+    - dashboards
+    - monitoring
+    - observability
+    - terraform
+spec:
+  type: library
+  lifecycle: experimental
+  owner: user:linuxlsr
